@@ -1,0 +1,502 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Библиотека | Главный стеллаж</title>
+  
+  <meta name="theme-color" content="#050508">
+
+  <!-- Фавиконки -->
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="shortcut icon" href="favicon.ico">
+  
+  <!-- Шрифты Google -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Manrope:wght@300;400;600&family=Marck+Script&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --gold: #e8c87a;
+      --gold-dim: rgba(232, 200, 122, 0.4);
+      --violet: #9b7bb8;
+      --violet-dim: rgba(155, 123, 184, 0.3);
+      --parchment: #f4e8d3;
+      --font-head: 'Cinzel', serif;
+      --font-body: 'Manrope', sans-serif;
+      --font-hand: 'Marck Script', cursive;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: #030305;
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 20%, #15121c 0%, #030305 80%);
+    }
+
+    /* Кнопка возврата */
+    .back-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(10, 10, 16, 0.8);
+      border: 1px solid var(--violet-dim);
+      color: var(--violet);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      cursor: pointer;
+      z-index: 100;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+    .back-btn:hover {
+      color: var(--gold);
+      border-color: var(--gold);
+      box-shadow: 0 0 10px var(--gold-dim);
+    }
+
+    .shelf-wrapper {
+      position: relative;
+      z-index: 10;
+      max-width: 1000px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 80px 20px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .shelf-title {
+      font-family: var(--font-head);
+      color: var(--gold);
+      font-size: 2rem;
+      text-align: center;
+      text-shadow: 0 0 15px var(--gold-dim);
+      margin-bottom: 10px;
+    }
+
+    .shelf-subtitle {
+      font-family: var(--font-hand);
+      color: var(--violet);
+      font-size: 1.3rem;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    /* Форма */
+    .add-book-form {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 40px;
+      background: rgba(5, 5, 8, 0.7);
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px solid rgba(232, 200, 122, 0.2);
+      backdrop-filter: blur(5px);
+      position: relative;
+      z-index: 20;
+    }
+
+    .add-book-form input {
+      flex: 1;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid var(--gold-dim);
+      border-radius: 8px;
+      color: var(--parchment);
+      font-family: var(--font-body);
+      font-size: 16px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .add-book-form input:focus {
+      border-color: var(--violet);
+      box-shadow: 0 0 15px var(--violet-dim);
+    }
+
+    .add-book-form button {
+      background: linear-gradient(to bottom, #4a2e15, #2b1f14);
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-family: var(--font-head);
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+    }
+    .add-book-form button:hover {
+      background: linear-gradient(to bottom, #5a3a1f, #3b2a1e);
+      box-shadow: 0 0 15px var(--gold-dim);
+    }
+
+    /* ==========================================
+       СТЕЛЛАЖ
+       ========================================== */
+    .bookshelf-container {
+      width: 100%;
+      max-width: 900px;
+      background: #0a0805;
+      border: 12px solid #1a1510;
+      border-radius: 4px;
+      padding: 15px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.9), inset 0 0 80px rgba(0,0,0,0.95);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Ряд */
+    .shelf-row {
+      display: flex;
+      align-items: flex-end;
+      height: 180px; /* Высота полки */
+      background: #050508;
+      border-bottom: 14px solid #2a1f15; /* Деревянная полка */
+      box-shadow: 0 10px 20px rgba(0,0,0,0.8), inset 0 5px 10px rgba(0,0,0,0.5);
+      position: relative;
+      padding: 0 10px;
+      overflow: hidden;
+    }
+
+    /* ==========================================
+       КНИГИ (Стоят вертикально, вид на корешок)
+       ========================================== */
+    .fake-book {
+      height: 95%;
+      width: 70px; /* Широкие книги */
+      border-radius: 4px 4px 0 0; /* Легкое скругление сверху */
+      position: relative;
+      flex-shrink: 0;
+      margin-right: 6px; /* Зазор между книгами */
+      box-shadow: 
+        inset -10px 0 15px rgba(0,0,0,0.8), /* Тень на сгибе */
+        inset 5px 0 10px rgba(255,255,255,0.05), /* Блик света */
+        2px 0 5px rgba(0,0,0,0.5); /* Тень на соседнюю книгу */
+      transition: transform 0.3s ease;
+      cursor: pointer;
+      border-left: 2px solid rgba(255,255,255,0.05);
+    }
+
+    /* Золотая рамка по периметру корешка (как на фото) */
+    .fake-book::before {
+      content: '';
+      position: absolute;
+      top: 15px; bottom: 15px; left: 10px; right: 10px;
+      border: 1px solid rgba(232, 200, 122, 0.3);
+      border-radius: 2px;
+      pointer-events: none;
+    }
+
+    /* Золотые точки (вертикально по центру корешка) */
+    .fake-book::after {
+      content: '•••••';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: rgba(232, 200, 122, 0.6);
+      font-size: 12px;
+      letter-spacing: 4px;
+      writing-mode: vertical-rl; /* Вертикальное написание */
+      text-orientation: upright;
+      pointer-events: none;
+    }
+
+    .fake-book:hover {
+      transform: translateY(-8px); /* Книга чуть выдвигается при наведении */
+      box-shadow: 
+        inset -10px 0 15px rgba(0,0,0,0.8), 
+        inset 5px 0 10px rgba(255,255,255,0.05), 
+        0 0 20px rgba(232, 200, 122, 0.3);
+    }
+
+    /* Цвета переплетов (Глубокие, как на фото) */
+    .fake-book.color-1 { background: linear-gradient(to right, #1f1611, #3d2b1f 50%, #1f1611); } /* Коричневый */
+    .fake-book.color-2 { background: linear-gradient(to right, #1a0b0b, #3a1515 50%, #1a0b0b); } /* Винный */
+    .fake-book.color-3 { background: linear-gradient(to right, #0b1a0d, #153a1d 50%, #0b1a0d); } /* Изумрудный */
+    .fake-book.color-4 { background: linear-gradient(to right, #121212, #2a2a2a 50%, #121212); } /* Черный */
+
+    /* Книга, которую ищем (Золотая) */
+    .target-book {
+      background: linear-gradient(to right, #4a2e15, #c49a45 50%, #4a2e15) !important;
+      border: 1px solid var(--gold);
+      box-shadow: 0 0 30px var(--gold-dim), inset 0 0 15px rgba(255,255,255,0.5);
+      z-index: 5;
+    }
+    .target-book::before { border-color: rgba(0,0,0,0.5); }
+    .target-book::after { color: #111; }
+
+    /* Анимация вылета */
+    @keyframes flyOut {
+      0% { transform: scale(1) translateY(0); opacity: 1; }
+      50% { transform: scale(1.1) translateY(-60px); opacity: 1; filter: brightness(1.5); }
+      100% { transform: scale(1.3) translateY(-250px); opacity: 0; filter: brightness(2); }
+    }
+
+    .book-flying {
+      animation: flyOut 1s ease-out forwards;
+      pointer-events: none;
+    }
+
+    /* Оверлей */
+    .book-found-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(5, 5, 8, 0.85);
+      backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+    
+    .book-found-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .found-card {
+      background: var(--parchment);
+      padding: 40px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 0 50px rgba(232, 200, 122, 0.3);
+      max-width: 400px;
+      width: 90%;
+      transform: translateY(20px);
+      transition: transform 0.5s ease;
+      border: 1px solid #4a2e15;
+    }
+
+    .book-found-overlay.active .found-card {
+      transform: translateY(0);
+    }
+
+    .found-card h2 {
+      color: #4a2e15;
+      font-family: var(--font-head);
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(74, 46, 21, 0.3);
+      padding-bottom: 10px;
+    }
+
+    .found-card p {
+      color: #6b4a2e;
+      font-size: 1.1rem;
+      margin-bottom: 25px;
+    }
+
+    .found-card button {
+      background: linear-gradient(to bottom, #4a2e15, #2b1f14);
+      color: var(--gold);
+      border: 1px solid var(--violet);
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-family: var(--font-head);
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .found-card button:hover {
+      box-shadow: 0 0 15px var(--violet-dim);
+      background: linear-gradient(to bottom, #5a3a1f, #3b2a1e);
+    }
+
+    /* Мобильная адаптация */
+    @media (max-width: 768px) {
+      .shelf-row { height: 140px; border-bottom: 10px solid #2a1f15; }
+      .fake-book { width: 50px; height: 90%; }
+      .add-book-form { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="index.html" class="back-btn">← К вратам</a>
+
+  <div class="shelf-wrapper">
+    <h1 class="shelf-title">Главный Стеллаж</h1>
+    <p class="shelf-subtitle">Введите название, чтобы достать книгу...</p>
+
+    <div class="add-book-form">
+      <input type="text" id="bookSearchInput" placeholder="Название книги..." autocomplete="off">
+      <button id="findBookBtn">Найти</button>
+    </div>
+
+    <!-- Стеллаж -->
+    <div class="bookshelf-container" id="mainShelf"></div>
+  </div>
+
+  <!-- Оверлей результата -->
+  <div class="book-found-overlay" id="bookFoundOverlay">
+    <div class="found-card">
+      <h2 id="foundBookTitle">Название</h2>
+      <p>Книга извлечена из архива.</p>
+      <button id="readBookBtn">Открыть книгу</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAkMWBSQ5-1aJEwmf5ijETE0P0ulE_UOwc",
+      authDomain: "library-740b6.firebaseapp.com",
+      databaseURL: "https://library-740b6-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "library-740b6",
+      storageBucket: "library-740b6.firebasestorage.app",
+      messagingSenderId: "386084173741",
+      appId: "1:386084173741:web:919c2ebe2c1789d9735324",
+      measurementId: "G-SBR8KY5P0C"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const mainShelf = document.getElementById('mainShelf');
+    
+    // ==========================================
+    // 1. ГЕНЕРАЦИЯ СТЕЛЛАЖА
+    // ==========================================
+    function generateFakeShelf() {
+      mainShelf.innerHTML = '';
+      
+      // 3 ряда
+      for (let row = 0; row < 3; row++) {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'shelf-row';
+        
+        // Заполняем 12 книгами
+        for (let i = 0; i < 12; i++) {
+          const book = document.createElement('div');
+          book.className = 'fake-book';
+          
+          const colorClass = 'color-' + (Math.floor(Math.random() * 4) + 1);
+          book.classList.add(colorClass);
+          
+          rowDiv.appendChild(book);
+        }
+        mainShelf.appendChild(rowDiv);
+      }
+    }
+
+    generateFakeShelf();
+
+    // ==========================================
+    // 2. ЛОГИКА КНОПОК
+    // ==========================================
+    const findBookBtn = document.getElementById('findBookBtn');
+    const bookSearchInput = document.getElementById('bookSearchInput');
+    const overlay = document.getElementById('bookFoundOverlay');
+    const foundBookTitle = document.getElementById('foundBookTitle');
+    const readBookBtn = document.getElementById('readBookBtn');
+
+    let currentBookData = null;
+
+    auth.onAuthStateChanged(user => {
+      if (!user) window.location.href = 'index.html';
+    });
+
+    findBookBtn.addEventListener('click', async () => {
+      const searchTitle = bookSearchInput.value.trim();
+      if (!searchTitle) {
+        bookSearchInput.style.borderColor = 'red';
+        setTimeout(() => bookSearchInput.style.borderColor = 'var(--gold-dim)', 1000);
+        return;
+      }
+
+      findBookBtn.disabled = true;
+      findBookBtn.textContent = 'Ищем...';
+
+      try {
+        const booksRef = ref(db, 'books');
+        const snapshot = await get(booksRef);
+        
+        let foundBook = null;
+        
+        if (snapshot.exists()) {
+          const booksData = snapshot.val();
+          for (const key in booksData) {
+            if (booksData[key].title.toLowerCase() === searchTitle.toLowerCase()) {
+              foundBook = { id: key, ...booksData[key] };
+              break;
+            }
+          }
+        }
+
+        if (!foundBook) {
+          foundBook = { id: Date.now().toString(), title: searchTitle };
+        }
+
+        triggerBookFly(foundBook);
+
+      } catch (error) {
+        console.error(error);
+        const localBook = { id: Date.now().toString(), title: searchTitle };
+        triggerBookFly(localBook);
+      }
+    });
+
+    // ==========================================
+    // 3. АНИМАЦИЯ
+    // ==========================================
+    function triggerBookFly(bookData) {
+      currentBookData = bookData;
+      
+      const rows = document.querySelectorAll('.shelf-row');
+      const randomRow = rows[Math.floor(Math.random() * rows.length)];
+      const randomBook = randomRow.children[Math.floor(Math.random() * randomRow.children.length)];
+      
+      if (randomBook) {
+        randomBook.classList.add('target-book');
+        randomBook.classList.add('book-flying');
+        
+        setTimeout(() => {
+          foundBookTitle.textContent = bookData.title;
+          overlay.classList.add('active');
+          
+          findBookBtn.disabled = false;
+          findBookBtn.textContent = 'Найти';
+          bookSearchInput.value = '';
+
+          setTimeout(() => {
+             randomBook.classList.remove('target-book', 'book-flying');
+          }, 500);
+
+        }, 1000);
+      }
+    }
+
+    // ==========================================
+    // 4. ПЕРЕХОД В ЧИТАЛКУ
+    // ==========================================
+    readBookBtn.addEventListener('click', () => {
+      localStorage.setItem('currentBook', JSON.stringify(currentBookData));
+      window.location.href = 'read.html';
+    });
+
+  </script>
+</body>
+</html>
