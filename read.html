@@ -1,0 +1,566 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Библиотека | Читальный зал</title>
+  
+  <meta name="theme-color" content="#050508">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="shortcut icon" href="favicon.ico">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Manrope:wght@300;400;600&family=Marck+Script&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --gold: #e8c87a;
+      --gold-dim: rgba(232, 200, 122, 0.4);
+      --violet: #9b7bb8;
+      --violet-dim: rgba(155, 123, 184, 0.3);
+      --parchment: #f4e8d3;
+      --text-ink: #2b1f14;
+      
+      --font-head: 'Cinzel', serif;
+      --font-body: 'Manrope', sans-serif;
+      --font-book: 'Lora', serif;
+      --font-hand: 'Marck Script', cursive;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+
+    body {
+      background: 
+        radial-gradient(circle at 10% 90%, rgba(232, 200, 122, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(232, 200, 122, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 50% 30%, #15121c 0%, #030305 80%);
+      background-color: #030305;
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-y: auto; 
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px 40px;
+    }
+
+    .back-btn {
+      position: fixed;
+      top: 20px; left: 20px;
+      background: rgba(10, 10, 16, 0.8);
+      border: 1px solid var(--violet-dim);
+      color: var(--violet);
+      padding: 8px 16px; border-radius: 8px;
+      font-family: var(--font-body); font-size: 14px;
+      cursor: pointer; z-index: 100;
+      transition: all 0.3s ease; text-decoration: none;
+      backdrop-filter: blur(5px);
+    }
+    .back-btn:hover { color: var(--gold); border-color: var(--gold); box-shadow: 0 0 10px var(--gold-dim); }
+
+    /* КНИГА */
+    .book-wrapper {
+      position: relative; width: 100%; max-width: 1000px; margin-bottom: 20px;
+    }
+
+    .book-container {
+      position: relative; display: flex; width: 100%; height: 70vh;
+      background: #1a120a; border-radius: 12px; padding: 15px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.9), 0 10px 20px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8);
+    }
+
+    .book-container::before {
+      content: ''; position: absolute; inset: 0;
+      border: 2px solid #2a1f15; border-radius: 12px;
+      pointer-events: none; box-shadow: inset 0 0 15px rgba(232, 200, 122, 0.1);
+    }
+
+    .book-spine {
+      position: absolute; top: 15px; bottom: 15px; left: 50%; transform: translateX(-50%);
+      width: 50px; background: linear-gradient(to right, rgba(0,0,0,0.8), rgba(0,0,0,0.3), rgba(0,0,0,0.8));
+      z-index: 5; pointer-events: none; box-shadow: inset 0 0 30px rgba(0,0,0,0.9);
+    }
+
+    .book-page {
+      flex: 1; background: var(--parchment); position: relative;
+      display: flex; flex-direction: column; padding: 30px 40px; overflow: hidden;
+      background-image: radial-gradient(circle at 20% 30%, rgba(180, 150, 120, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 70%, rgba(180, 150, 120, 0.1) 0%, transparent 40%);
+    }
+
+    .book-page.left { border-radius: 8px 0 0 8px; box-shadow: inset -20px 0 30px -10px rgba(0,0,0,0.4); }
+    .book-page.right { border-radius: 0 8px 8px 0; box-shadow: inset 20px 0 30px -10px rgba(0,0,0,0.4); }
+
+    .book-title-header {
+      font-family: var(--font-head); color: #4a2e15; font-size: 1.6rem;
+      text-align: center; margin-bottom: 20px; padding-bottom: 15px;
+      border-bottom: 2px solid rgba(74, 46, 21, 0.2); letter-spacing: 1px;
+    }
+
+    .page-content {
+      flex: 1; overflow-y: auto; padding-right: 10px; transition: opacity 0.3s ease;
+    }
+    .page-content::-webkit-scrollbar { width: 6px; }
+    .page-content::-webkit-scrollbar-thumb { background: rgba(74, 46, 21, 0.3); border-radius: 3px; }
+
+    .chapter-title {
+      font-family: var(--font-head); color: #6b4a2e; font-size: 1.3rem;
+      margin-bottom: 20px; text-align: center; text-transform: uppercase;
+    }
+
+    .book-text {
+      font-family: var(--font-book); color: var(--text-ink); font-size: 1.05rem;
+      line-height: 1.7; text-align: justify; hyphens: auto;
+    }
+
+    .book-text p { margin-bottom: 12px; text-indent: 30px; }
+
+    .drop-cap {
+      float: left; font-family: var(--font-head); font-size: 3.5rem;
+      line-height: 0.8; padding-top: 5px; padding-right: 10px; padding-left: 5px;
+      color: #4a2e15; text-shadow: 2px 2px 0px rgba(232, 200, 122, 0.3);
+    }
+
+    /* ОБЛОЖКА */
+    .cover-view {
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      height: 100%; width: 100%; text-align: center; animation: fadeIn 0.5s ease;
+    }
+    .cover-title {
+      font-family: var(--font-head); color: #4a2e15; font-size: 2.5rem;
+      margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    .cover-decoration { font-size: 3rem; color: var(--gold); text-shadow: 0 0 20px var(--gold-dim); animation: pulse 3s infinite alternate; }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    @keyframes pulse { from { opacity: 0.8; transform: scale(1); } to { opacity: 1; transform: scale(1.1); } }
+
+    /* НАВИГАЦИЯ */
+    .nav-controls {
+      position: absolute; bottom: -45px; left: 0; right: 0;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 40px; z-index: 10;
+    }
+    .nav-btn {
+      background: linear-gradient(to bottom, #4a2e15, #2b1f14);
+      border: 1px solid var(--gold); color: var(--gold);
+      padding: 8px 20px; border-radius: 8px; font-family: var(--font-head);
+      font-size: 14px; cursor: pointer; transition: all 0.3s ease;
+    }
+    .nav-btn:hover:not(:disabled) { background: linear-gradient(to bottom, #5a3a1f, #3b2a1e); box-shadow: 0 0 15px var(--gold-dim); }
+    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; box-shadow: none; }
+    .page-indicator { font-family: var(--font-head); color: var(--gold); font-size: 1rem; text-shadow: 0 0 10px #000; }
+
+    /* ОТЗЫВЫ */
+    .reviews-section {
+      width: 100%; max-width: 600px; margin-top: 10px;
+      background: rgba(10, 10, 16, 0.85); border: 1px solid var(--gold-dim);
+      border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      backdrop-filter: blur(10px);
+    }
+    .reviews-title { font-family: var(--font-head); color: var(--gold); font-size: 1.2rem; text-align: center; margin-bottom: 15px; }
+    .stars-container { display: flex; justify-content: center; gap: 5px; font-size: 1.5rem; margin-bottom: 15px; cursor: pointer; }
+    .star { color: rgba(255,255,255,0.1); transition: all 0.2s ease; }
+    .star.active { color: var(--gold); text-shadow: 0 0 10px var(--gold); transform: scale(1.1); }
+    .review-input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+    .review-input-group textarea {
+      flex: 1; padding: 10px; background: rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--gold-dim); border-radius: 8px; color: var(--parchment);
+      font-family: var(--font-body); font-size: 13px; resize: none; min-height: 50px;
+    }
+    .review-input-group textarea:focus { border-color: var(--violet); }
+    .review-input-group button {
+      background: linear-gradient(to bottom, #4a2e15, #2b1f14); border: 1px solid var(--gold);
+      color: var(--gold); padding: 0 20px; border-radius: 8px;
+      font-family: var(--font-head); font-size: 13px; cursor: pointer;
+    }
+    .reviews-list { display: flex; flex-direction: column; gap: 10px; max-height: 200px; overflow-y: auto; padding-right: 5px; }
+    .reviews-list::-webkit-scrollbar { width: 4px; }
+    .reviews-list::-webkit-scrollbar-thumb { background: var(--violet-dim); }
+    .review-card { background: rgba(255,255,255,0.03); border-left: 3px solid var(--violet); padding: 10px; border-radius: 0 8px 8px 0; }
+    .review-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.8rem; }
+    .review-author { color: var(--gold); font-weight: 600; }
+    .review-stars { color: var(--gold); }
+    .review-text { color: var(--text-main); font-size: 0.85rem; }
+
+    .loading-screen {
+      position: absolute; inset: 0; display: flex; justify-content: center; align-items: center;
+      background: var(--parchment); color: #4a2e15; font-family: var(--font-hand); font-size: 1.8rem;
+      z-index: 20; border-radius: 8px;
+    }
+
+    /* МОБИЛЬНАЯ АДАПТАЦИЯ */
+    @media (max-width: 768px) {
+      body { padding: 60px 10px 30px; }
+      .book-container { height: 65vh; flex-direction: column; padding: 10px; }
+      .book-page.left { display: none !important; }
+      .book-page.right { border-radius: 8px; padding: 20px; box-shadow: none; }
+      .book-spine { display: none; }
+      .nav-controls { padding: 0 10px; bottom: -45px; }
+      .cover-title { font-size: 1.8rem; }
+      .reviews-section { margin-top: 30px; }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="shelf.html" class="back-btn">← На полку</a>
+
+  <div class="book-wrapper">
+    <div class="book-container">
+      <div class="loading-screen" id="loadingScreen">Открываем книгу...</div>
+      
+      <div class="book-spine"></div>
+
+      <div class="book-page left" id="leftPage">
+        <div class="book-title-header" id="bookTitleLeft">Название</div>
+        <div class="page-content" id="leftPageContent">
+          <div class="chapter-title" id="chapterTitleLeft"></div>
+          <div class="book-text" id="bookTextLeft"></div>
+        </div>
+      </div>
+
+      <div class="book-page right" id="rightPage">
+        <div class="page-content" id="rightPageContent">
+          <div class="book-text" id="bookTextRight"></div>
+        </div>
+      </div>
+
+      <div class="nav-controls">
+        <button class="nav-btn" id="prevBtn" disabled>← Назад</button>
+        <div class="page-indicator" id="pageIndicator">Обложка</div>
+        <button class="nav-btn" id="nextBtn">Вперед →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="reviews-section">
+    <div class="reviews-title">Ваш след в этой книге</div>
+    
+    <div class="stars-container" id="starRating">
+      <span class="star" data-value="1">★</span>
+      <span class="star" data-value="2">★</span>
+      <span class="star" data-value="3">★</span>
+      <span class="star" data-value="4">★</span>
+      <span class="star" data-value="5">★</span>
+    </div>
+
+    <div class="review-input-group">
+      <textarea id="reviewText" placeholder="Что вы думаете об этой книге?"></textarea>
+      <button id="submitReview">Оставить</button>
+    </div>
+
+    <div class="reviews-list" id="reviewsList"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { getDatabase, ref, get, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAkMWBSQ5-1aJEwmf5ijETE0P0ulE_UOwc",
+      authDomain: "library-740b6.firebaseapp.com",
+      databaseURL: "https://library-740b6-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "library-740b6",
+      storageBucket: "library-740b6.firebasestorage.app",
+      messagingSenderId: "386084173741",
+      appId: "1:386084173741:web:919c2ebe2c1789d9735324",
+      measurementId: "G-SBR8KY5P0C"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const loadingScreen = document.getElementById('loadingScreen');
+      const bookTitleLeft = document.getElementById('bookTitleLeft');
+      const chapterTitleLeft = document.getElementById('chapterTitleLeft');
+      const bookTextLeft = document.getElementById('bookTextLeft');
+      const bookTextRight = document.getElementById('bookTextRight');
+      const leftPageContent = document.getElementById('leftPageContent');
+      const rightPageContent = document.getElementById('rightPageContent');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const pageIndicator = document.getElementById('pageIndicator');
+
+      const starRating = document.getElementById('starRating');
+      const stars = starRating.querySelectorAll('.star');
+      const reviewText = document.getElementById('reviewText');
+      const submitReviewBtn = document.getElementById('submitReview');
+      const reviewsList = document.getElementById('reviewsList');
+
+      const currentBookStr = localStorage.getItem('currentBook');
+      if (!currentBookStr) {
+        window.location.href = 'shelf.html';
+        return;
+      }
+
+      const currentBook = JSON.parse(currentBookStr);
+      bookTitleLeft.textContent = currentBook.title;
+      document.title = `Библиотека | ${currentBook.title}`;
+
+      // Генерируем ПОСТОЯННЫЙ ID на основе названия книги (убираем пробелы и спецсимволы)
+      const bookId = currentBook.title.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^\wа-яё_]/gi, '');
+
+      let chapters = [];
+      let currentChapterIndex = 0;
+      let userId = null;
+      let librarianName = "Странник";
+      let userExistingReviewId = null;
+
+      const isMobile = window.innerWidth <= 768;
+
+      auth.onAuthStateChanged(async (user) => {
+        if (!user) { window.location.href = 'index.html'; return; }
+        userId = user.uid;
+        
+        try {
+          const userRef = ref(db, `users/${userId}/nickname`);
+          const snap = await get(userRef);
+          if (snap.exists()) librarianName = snap.val();
+        } catch (e) {}
+
+        await loadBookText();
+        await loadBookmark();
+        loadReviews();
+      });
+
+      async function loadBookText() {
+        try {
+          const encodedTitle = encodeURIComponent(currentBook.title);
+          const filePath = `books/${encodedTitle}.txt`;
+          const response = await fetch(filePath);
+          if (!response.ok) throw new Error('Файл не найден');
+
+          const text = await response.text();
+          chapters = text.split(/(?=Глава\s+\d+)/i);
+          if (chapters.length <= 1) chapters = [text];
+          else if (chapters[0].trim() === '') chapters.shift();
+
+          loadingScreen.style.display = 'none';
+        } catch (error) {
+          loadingScreen.innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+              <div style="font-size: 1.5rem; margin-bottom: 10px;">Текст не найден</div>
+              <div style="font-size: 0.9rem; color: #a00;">Путь: books/${currentBook.title}.txt</div>
+            </div>
+          `;
+        }
+      }
+
+      // ЗАГРУЗКА ЗАКЛАДКИ (используем постоянный bookId)
+      async function loadBookmark() {
+        if (!userId || chapters.length === 0) return;
+        try {
+          const bookmarkRef = ref(db, `bookmarks/${userId}/${bookId}`);
+          const snapshot = await get(bookmarkRef);
+          if (snapshot.exists()) {
+            const savedChapter = snapshot.val();
+            if (savedChapter >= 0 && savedChapter <= chapters.length) {
+              currentChapterIndex = savedChapter;
+            }
+          }
+          renderPage();
+        } catch (e) {
+          renderPage();
+        }
+      }
+
+      function renderPage() {
+        bookTextLeft.innerHTML = '';
+        bookTextRight.innerHTML = '';
+        chapterTitleLeft.textContent = '';
+        bookTitleLeft.style.display = 'block';
+        leftPageContent.style.display = 'block';
+        
+        const oldCover = document.querySelector('.cover-view');
+        if (oldCover) oldCover.remove();
+
+        if (currentChapterIndex === 0) {
+          pageIndicator.textContent = "Обложка";
+          prevBtn.disabled = true;
+          nextBtn.disabled = false;
+          leftPageContent.style.display = 'none';
+          
+          const coverHtml = `
+            <div class="cover-view">
+              <div class="cover-decoration">🕯️</div>
+              <div class="cover-title">${currentBook.title}</div>
+              <div style="font-family: var(--font-hand); font-size: 1.2rem; color: #6b4a2e; margin-top: 20px;">
+                Нажмите «Вперед», чтобы открыть...
+              </div>
+            </div>
+          `;
+          rightPageContent.innerHTML = coverHtml;
+          
+        } else {
+          leftPageContent.style.display = 'block';
+          rightPageContent.innerHTML = `<div class="book-text" id="bookTextRight"></div>`;
+          const textId = document.getElementById('bookTextRight');
+          
+          const chapterText = chapters[currentChapterIndex - 1];
+
+          const match = chapterText.match(/^(Глава\s+\d+[^\n]*)([\s\S]*)/i);
+          let titleText = '';
+          let bodyText = chapterText;
+
+          if (match) {
+            titleText = match[1].trim();
+            bodyText = match[2].trim();
+          }
+
+          chapterTitleLeft.textContent = titleText;
+
+          let paragraphs = bodyText.split('\n').filter(p => p.trim() !== '');
+          let htmlParagraphs = paragraphs.map(p => `<p>${p.trim()}</p>`);
+
+          if (htmlParagraphs.length > 0) {
+            htmlParagraphs[0] = htmlParagraphs[0].replace(/<p>([^<])/, '<p><span class="drop-cap">$1</span>');
+          }
+
+          if (isMobile) {
+            textId.innerHTML = htmlParagraphs.join('');
+          } else {
+            const half = Math.ceil(htmlParagraphs.length / 2);
+            bookTextLeft.innerHTML = htmlParagraphs.slice(0, half).join('');
+            textId.innerHTML = htmlParagraphs.slice(half).join('');
+          }
+
+          pageIndicator.textContent = `Глава ${currentChapterIndex} / ${chapters.length}`;
+          prevBtn.disabled = false;
+          nextBtn.disabled = currentChapterIndex === chapters.length;
+          
+          leftPageContent.scrollTop = 0;
+          rightPageContent.scrollTop = 0;
+        }
+
+        // СОХРАНЕНИЕ ЗАКЛАДКИ (используем постоянный bookId)
+        if (userId) {
+          set(ref(db, `bookmarks/${userId}/${bookId}`), currentChapterIndex).catch(()=>{});
+        }
+      }
+
+      prevBtn.addEventListener('click', () => {
+        if (currentChapterIndex > 0) {
+          currentChapterIndex--;
+          renderPage();
+        }
+      });
+
+      nextBtn.addEventListener('click', () => {
+        if (currentChapterIndex < chapters.length) {
+          currentChapterIndex++;
+          renderPage();
+        }
+      });
+
+      // --- ОТЗЫВЫ ---
+      let currentRating = 0;
+
+      stars.forEach(star => {
+        star.addEventListener('mouseenter', () => highlightStars(parseInt(star.dataset.value)));
+        star.addEventListener('mouseleave', () => highlightStars(currentRating));
+        star.addEventListener('click', () => {
+          currentRating = parseInt(star.dataset.value);
+          highlightStars(currentRating);
+        });
+      });
+
+      function highlightStars(rating) {
+        stars.forEach(s => s.classList.toggle('active', parseInt(s.dataset.value) <= rating));
+      }
+
+      function loadReviews() {
+        // Для отзывов тоже используем постоянный bookId
+        const reviewsRef = ref(db, `reviews/${bookId}`);
+        
+        onValue(reviewsRef, (snapshot) => {
+          reviewsList.innerHTML = '';
+          userExistingReviewId = null;
+          
+          if (!snapshot.exists()) {
+            reviewsList.innerHTML = '<div style="text-align: center; opacity: 0.5; font-size: 0.85rem;">Отзывов пока нет.</div>';
+            return;
+          }
+
+          const reviews = snapshot.val();
+          const reviewsArray = [];
+          
+          for (const key in reviews) {
+            const rev = reviews[key];
+            rev.id = key;
+            reviewsArray.push(rev);
+            
+            if (rev.author === librarianName) {
+              userExistingReviewId = key;
+              if (reviewText.value === '' && currentRating === 0) {
+                reviewText.value = rev.text;
+                currentRating = rev.rating;
+                highlightStars(currentRating);
+              }
+            }
+          }
+
+          reviewsArray.sort((a, b) => b.date - a.date);
+
+          reviewsArray.forEach(review => {
+            const card = document.createElement('div');
+            card.className = 'review-card';
+            const starsStr = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+            card.innerHTML = `
+              <div class="review-header">
+                <span class="review-author">${review.author} ${review.author === librarianName ? '(Вы)' : ''}</span>
+                <span class="review-stars">${starsStr}</span>
+              </div>
+              <div class="review-text">${review.text}</div>
+            `;
+            reviewsList.appendChild(card);
+          });
+        });
+      }
+
+      submitReviewBtn.addEventListener('click', async () => {
+        const text = reviewText.value.trim();
+        if (currentRating === 0) { alert('Поставьте оценку!'); return; }
+        if (text === '') { alert('Напишите текст.'); return; }
+
+        submitReviewBtn.disabled = true;
+        submitReviewBtn.textContent = '...';
+
+        try {
+          const reviewsRef = ref(db, `reviews/${bookId}`);
+          
+          if (userExistingReviewId) {
+            await set(ref(db, `reviews/${bookId}/${userExistingReviewId}`), {
+              author: librarianName,
+              rating: currentRating,
+              text: text,
+              date: Date.now()
+            });
+          } else {
+            await push(reviewsRef, {
+              author: librarianName,
+              rating: currentRating,
+              text: text,
+              date: Date.now()
+            });
+          }
+
+          reviewText.value = '';
+          currentRating = 0;
+          highlightStars(0);
+          
+        } catch (error) {
+          alert('Ошибка: ' + error.message);
+        } finally {
+          submitReviewBtn.disabled = false;
+          submitReviewBtn.textContent = 'Оставить';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
